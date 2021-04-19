@@ -1,6 +1,6 @@
 {
   "name": "pino-bravo",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A beautiful minimalist formatter for pino.",
   "homepage": "https://github.com/runbots/browser",
   "author": "Nicolas Gryman <ngryman@runbots.io> (https://runbots.io)",
