@@ -1,0 +1,12 @@
+# OS files
+.DS_Store
+*#
+*~
+
+# npm
+node_modules/
+npm-debug.log
+.node_history
+
+# build
+dist/
