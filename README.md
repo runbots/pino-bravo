@@ -5,7 +5,7 @@
 > A beautiful minimalist formatter for pino.
 
 <p align="center">
-  <img src="./art.png" width="600" />
+  <img src="./art.png" width="867" height="205" />
 </p>
 
 ## Install
