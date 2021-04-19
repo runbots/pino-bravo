@@ -59,7 +59,7 @@
     "*.{md,ts}": "npm run format",
     "*.ts": [
       "npm run lint",
-      "tsc -p . --noEmit"
+      "sh -c 'tsc --project . --noEmit'"
     ]
   },
   "release-it": {
