@@ -55,18 +55,12 @@
       "plugin:@typescript-eslint/recommended"
     ]
   },
-  "husky": {
-    "hooks": {
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
-      "pre-commit": "lint-staged"
-    }
-  },
   "lint-staged": {
-    "*.{md,ts}": [
+    "*.{md,ts}": "npm run format",
+    "*.ts": [
       "npm run lint",
-      "npm run format"
-    ],
-    "*.ts": "tsc -p . --noEmit"
+      "tsc -p . --noEmit"
+    ]
   },
   "release-it": {
     "git": {
