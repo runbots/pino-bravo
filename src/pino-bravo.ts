@@ -4,6 +4,7 @@ import { COLOR_PALETTE, LEVELS, LEVEL_COLORS, LEVEL_PADDING } from './contants'
 import {
   FormatterFactory,
   Input,
+  Level,
   Options,
   PartialOptions,
   Style
@@ -13,10 +14,9 @@ function stylize(str: string, style: Style) {
   return `${styles[style].open}${str}${styles[style].close}`
 }
 
-function formatLevel(level: number) {
-  const output = LEVELS[level]
-  const style = LEVEL_COLORS[output]
-  return stylize(output.padStart(LEVEL_PADDING), style)
+function formatLevel(level: Level) {
+  const style = LEVEL_COLORS[level]
+  return stylize(level.padStart(LEVEL_PADDING), style)
 }
 
 function ensureModuleStyle(module: string, options: Options) {
@@ -32,24 +32,29 @@ function ensureModuleStyle(module: string, options: Options) {
   return options.modules[module]
 }
 
-function formatModule(module: string, input: Input, options: Options) {
+function formatModule(module: string, level: Level, options: Options) {
   const moduleStyle = ensureModuleStyle(module, options)
-  const style =
-    input.level < 20 ? LEVEL_COLORS[LEVELS[input.level]] : moduleStyle
+  const style = level === 'trace' ? LEVEL_COLORS[level] : moduleStyle
   return stylize(module.padEnd(options.modulePadding), style)
 }
 
-function formatMsg(msg: string, input: Input) {
-  const style = input.level < 20 ? LEVEL_COLORS[LEVELS[input.level]] : 'reset'
+function formatMsg(msg: string, level: Level) {
+  const style = level === 'trace' ? LEVEL_COLORS[level] : 'reset'
   return stylize(msg, style)
+}
+
+function formatErr(err: Error) {
+  // Trim the error message as we already displayed it
+  const trimmedStack = err.stack.substr(err.stack.indexOf('\n'))
+  return stylize(trimmedStack, 'dim')
 }
 
 function formatArgs(
   args: Record<string, unknown>,
-  input: Input,
+  module: string,
+  msg: string,
   options: Options
 ) {
-  const style = 'dim'
   const output = Object.keys(args)
     .filter(key => !options.ignoreKeys.includes(key))
     .reduce((str, key) => `${str}, ${key}=${args[key]}`, '')
@@ -57,11 +62,11 @@ function formatArgs(
     .padStart(
       process.stdout.columns -
         LEVEL_PADDING -
-        Math.max(input.module.length, options.modulePadding) -
-        input.msg.length -
+        Math.max(module.length, options.modulePadding) -
+        msg.length -
         4
     )
-  return stylize(output, style)
+  return stylize(output, 'dim')
 }
 
 const defaultOptions: Options = {
@@ -93,13 +98,17 @@ export default function pinoBravo(
     const normalizedOpts = normalizeOptions(options)
 
     return function format(input: Input) {
-      const { level, module, msg, ...args } = input
+      const { level: levelNum, module, err, ...args } = input
+
+      const level = LEVELS[levelNum]
+      const msg = input.msg || err?.message || ''
 
       let output = ''
       output += formatLevel(level) + ' '
-      output += formatModule(module, input, normalizedOpts) + ' '
-      output += formatMsg(msg, input) + ' '
-      output += formatArgs(args, input, normalizedOpts) + ' '
+      output += formatModule(module, level, normalizedOpts) + ' '
+      output += formatMsg(msg, level) + ' '
+      output += err ? formatErr(err) + ' ' : ''
+      output += formatArgs(args, module, msg, normalizedOpts) + ' '
 
       return output + EOL
     }

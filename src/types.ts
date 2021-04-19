@@ -8,6 +8,7 @@ export type Input = {
   level: number
   time: number
   msg: string
+  err?: Error
   pid: number
   hostname: string
   module?: string
